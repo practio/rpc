@@ -4,28 +4,41 @@ import { v4 } from 'uuid';
 main();
 
 async function main () {
-  const events = new Array(100).fill(undefined).map(createRandomEvent);
+  const events = new Array(5).fill(undefined).map(createRandomEvent);
   
   await createRpcServer({
     namespace: 'server',
     procedures: {
       findEvent,
       getEventIds,
-      getEvents
+      getEvents,
+      getEventsAsStream
     },
     url: 'amqp://localhost'
   });
 
   async function findEvent({ eventId }) {
+    console.info('findEvent()', { eventId });
+
     return events.find(event => event.id === eventId);
   }
 
   async function getEventIds() {
+    console.info('getEventIds()');
+
     return events.map(({ id }) => id);
   }
 
   async function getEvents() {
-    return sleepyIterator(events);
+    console.info('getEvents()');
+
+    return events;
+  }
+
+  async function getEventsAsStream() {
+    console.info('getEventsAsStream()');
+
+    return sleepyAsyncIterator(events);
   }
 }
 
@@ -36,9 +49,9 @@ function createRandomEvent() {
   }
 }
 
-async function* sleepyIterator(iterator) {
+async function* sleepyAsyncIterator(iterator) {
   for (let item of iterator) {
-    await sleep(100)
+    await sleep(1)
 
     yield item;
   }
