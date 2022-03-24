@@ -1,0 +1,26 @@
+{
+  "name": "@practio/rpc",
+  "version": "1.0.0",
+  "description": "Remote Procedure Call (RPC) over AMQP.",
+  "main": "index.js",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./client": "./src/client.js",
+    "./server": "./src/server.js"
+  },
+  "scripts": {
+    "start": "concurrently \"npm run start:client 1\" \"npm run start:server\"",
+    "start:client": "node ./test/client.js",
+    "start:server": "node ./test/server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "7.0.0",
+    "uuid": "8.3.2"
+  },
+  "dependencies": {
+    "amqplib": "0.8.0"
+  }
+}
