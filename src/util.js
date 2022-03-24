@@ -13,7 +13,7 @@ export function parseContent(content) {
 }
 
 export function createCallQueueName(namespace) {
-  return [namespace, 'call'].join('-');
+  return [namespace, 'calls'].join('-');
 }
 
 export function newPromiseAndExecutor () {
