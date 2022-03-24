@@ -1,10 +1,12 @@
 import { createRpcServer } from '@practio/rpc/server';
-import { v4 } from 'uuid';
+import { MongoClient, ObjectId } from 'mongodb';
 
 main();
 
 async function main () {
-  const events = new Array(5).fill(undefined).map(createRandomEvent);
+  const client = await MongoClient.connect('mongodb://localhost');
+  const db = client.db('practio-github');
+  const events = db.collection('events');
   
   await createRpcServer({
     namespace: 'server',
@@ -20,43 +22,24 @@ async function main () {
   async function findEvent({ eventId }) {
     console.info('findEvent()', { eventId });
 
-    return events.find(event => event.id === eventId);
+    return events.findOne({ _id: new ObjectId(eventId) });
   }
 
   async function getEventIds() {
     console.info('getEventIds()');
 
-    return events.map(({ id }) => id);
+    return events.find({}).map(event => event._id).toArray();
   }
 
   async function getEvents() {
     console.info('getEvents()');
 
-    return events;
+    return events.find({}).toArray();
   }
 
   async function getEventsAsStream() {
     console.info('getEventsAsStream()');
 
-    return sleepyAsyncIterator(events);
+    return events.find({});
   }
-}
-
-function createRandomEvent() {
-  return {
-    id: v4(),
-    ts: new Date()
-  }
-}
-
-async function* sleepyAsyncIterator(iterator) {
-  for (let item of iterator) {
-    await sleep(1)
-
-    yield item;
-  }
-}
-
-async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
