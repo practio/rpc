@@ -4,7 +4,6 @@ main();
 
 async function main () {
   const rpcClient = await createRpcClient({
-    namespace: 'client',
     url: 'amqp://localhost'
   });
 
