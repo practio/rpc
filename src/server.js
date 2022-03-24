@@ -1,6 +1,6 @@
 import amqplib from 'amqplib';
 
-import { createCallQueueName, parseMessageContent, stringifyMessageContent } from './util.js';
+import { createCallQueueName, parseContent, stringifyContent } from './util.js';
 
 export async function createRpcServer({ url, namespace, procedures }) {
   const connection = await amqplib.connect(url);
@@ -13,8 +13,10 @@ export async function createRpcServer({ url, namespace, procedures }) {
   return { dispose };
 
   async function consumeCallQueue(message) {
-    const { name, params } = parseMessageContent(message.content);
-
+    const { content, properties } = message;
+    const { correlationId, replyTo } = properties;
+    const { name, params } = parseContent(content);
+    
     const procedure = procedures[name];
 
     if (!procedure) {
@@ -23,15 +25,30 @@ export async function createRpcServer({ url, namespace, procedures }) {
 
     const result = await procedure(params);
 
-    channel.ack(message);
+    if (isAsyncIterator(result)) {
+      channel.ack(message);
 
-    channel.sendToQueue(message.properties.replyTo, stringifyMessageContent(result), {
-      correlationId: message.properties.correlationId
-    });
+      for await (const value of result) {
+        channel.sendToQueue(replyTo, stringifyContent({ type: 'stream', value }), { correlationId });
+      }
+
+      channel.sendToQueue(replyTo, stringifyContent({ type: 'stream', value: undefined, done: true }), { correlationId });
+    } else {
+      channel.ack(message);
+      channel.sendToQueue(replyTo, stringifyContent({ type: 'object', value: result }), { correlationId });
+    }
   }
 
   async function dispose() {
     await channel.close();
     await connection.close();
   }
+}
+
+function isAsyncIterator(value) {
+  if (!value) {
+    return false;
+  }
+
+  return typeof value[Symbol.asyncIterator] === 'function'
 }

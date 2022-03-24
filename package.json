@@ -10,9 +10,9 @@
     "./server": "./src/server.js"
   },
   "scripts": {
-    "start": "concurrently \"npm run start:client 1\" \"npm run start:server\"",
-    "start:client": "node ./test/client.js",
-    "start:server": "node ./test/server.js"
+    "demo": "concurrently \"npm run demo:client\" \"npm run demo:server\"",
+    "demo:client": "node ./demo/client/main.js",
+    "demo:server": "node ./demo/server/main.js"
   },
   "author": "",
   "license": "ISC",

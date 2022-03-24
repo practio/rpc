@@ -4,12 +4,12 @@ export function newCorrelationId() {
     Math.random().toString();
 }
 
-export function stringifyMessageContent(messageContent) {
-  return Buffer.from(JSON.stringify(messageContent))
+export function stringifyContent(content) {
+  return Buffer.from(JSON.stringify(content))
 }
 
-export function parseMessageContent(messageContent) {
-  return JSON.parse(messageContent.toString());
+export function parseContent(content) {
+  return JSON.parse(content.toString());
 }
 
 export function createCallQueueName(namespace) {

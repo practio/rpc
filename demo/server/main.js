@@ -10,7 +10,8 @@ async function main () {
     namespace: 'server',
     procedures: {
       findEvent,
-      getEventIds
+      getEventIds,
+      getEvents
     },
     url: 'amqp://localhost'
   });
@@ -22,6 +23,10 @@ async function main () {
   async function getEventIds() {
     return events.map(({ id }) => id);
   }
+
+  async function getEvents() {
+    return sleepyIterator(events);
+  }
 }
 
 function createRandomEvent() {
@@ -29,4 +34,16 @@ function createRandomEvent() {
     id: v4(),
     ts: new Date()
   }
+}
+
+async function* sleepyIterator(iterator) {
+  for (let item of iterator) {
+    await sleep(100)
+
+    yield item;
+  }
+}
+
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
